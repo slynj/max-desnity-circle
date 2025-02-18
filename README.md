@@ -1,6 +1,6 @@
 # Max Density Circle
 
-# Problem Statement
+## Problem Statement
 
 **Given:**
 
@@ -11,7 +11,7 @@
 
 - Continuously identify the coordinate $c$ such that the circle of radius 100 m centred at $c$contains the maximum number of points from P. The solution must be updated in near real time as new points are added (or removed).
 
-# DBSCAN (Density Based Spatial Clustering of Applications with Noise)
+## DBSCAN (Density Based Spatial Clustering of Applications with Noise)
 
 - Clustering algorithm used in ML to partition data into clusters based on their distance to other points.
 - Effective at identifying and removing noise (outliers) in a data set.
@@ -27,7 +27,7 @@
 - If minPts is too high ⇒ cut off is too high so there might be less clusters and a lot of outliers.
 - If minPts is too low ⇒ outliers can be considered as clusters
 
-## Procedure
+### Procedure
 
 1. Parameter: radius and the min. neighbour points
 
@@ -60,7 +60,7 @@
 
 6. After grouping with the core points, if there are non core points left, they are classified as outliers.
 
-## Pseudocode
+### Pseudocode
 
 ```python
 DBSCAN(dataset, eps, MinPts) {
@@ -79,8 +79,8 @@ DBSCAN(dataset, eps, MinPts) {
     }
 }
 ```
-
-## Algorithm Implementation with Python
+<details>
+  <summary>Algorithm Implementation with Python</summary>
 
 ```python
 import numpy as np
@@ -134,8 +134,10 @@ min_pts = 2
 clusters = dbscan(data, eps, min_pts)
 print(clusters)
 ```
+</details>
 
-## Example Code
+## Clustering
+![image.png](img/DBSCAN_clustering.png)
 
 ```python
 import matplotlib.pyplot as plt
@@ -154,7 +156,7 @@ plt.title("DBSCAN Clustering")
 plt.show()
 ```
 
-## Questions
+### Questions
 
 - Seems useful for clustering, but how does this help us find the coord of the circle?
     - DBSCAN can find the dense area, but it doesn’t specifically return the coord that has the most points within a given radius (= the problem statement)
@@ -163,12 +165,72 @@ plt.show()
         2. Multiple DBSCAN procedures with different eps values (50m, 10m, 100m)
         3. Group with DBSCAN and local search (select the centre point, select centre point and compare, etc.)
 
-## Resources
+### Find the Densest Cluster
 
-- https://www.youtube.com/watch?v=RDZUdRSDOok&ab_channel=StatQuestwithJoshStarmer
-- https://www.geeksforgeeks.org/dbscan-clustering-in-ml-density-based-clustering/
+- Calculates the centre point of each cluster then counts the number of points inside.
 
-# Mean-Shift Clustering
+![image.png](img/DBSCAN_densest.png)
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
+from sklearn.datasets import make_blobs
+from scipy.spatial import distance
+
+X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.5, random_state=0)
+
+db = DBSCAN(eps=0.3, min_samples=5).fit(X)
+labels = db.labels_
+
+unique_labels = set(labels) - {-1} 
+centers = []
+
+for l in unique_labels:
+    mask_bool = (labels == l)
+    cluster_points = X[mask_bool]
+
+    x_min = np.min(cluster_points[:, 0])
+    x_max = np.max(cluster_points[:, 0])
+    y_min = np.min(cluster_points[:, 1])
+    y_max = np.max(cluster_points[:, 1])
+
+    center_pt = np.array([(x_min + x_max) / 2, (y_min + y_max) / 2])
+    centers.append((l, center_pt))
+
+radius = 1
+pt_counts = {}
+
+for l, c in centers:
+    count = np.sum(distance.cdist([c], X, 'euclidean')[0] <= radius)
+    pt_counts[l] = count
+    print(f"cluster {l}: {c} [{count}]")
+
+max_dens_cluster = max(pt_counts, key=pt_counts.get)
+max_dens_pt = dict(centers)[max_dens_cluster]
+
+plt.figure(figsize=(8, 6))     
+plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis', edgecolors='k')
+
+for l, c in centers:
+    markerC = 'red' if l != max_dens_cluster else 'blue'
+    plt.scatter(c[0], c[1], c=markerC, marker='X', s=200, label=f"Cluster {l}")
+
+    circle = plt.Circle(c, radius, color=markerC, fill=False, linestyle='dashed')
+    plt.gca().add_patch(circle)
+
+plt.axis('equal')
+plt.title("DBSCAN Clustering - Max Density Circle")
+plt.legend()
+plt.show()
+```
+
+### References
+
+- [https://www.youtube.com/watch?v=RDZUdRSDOok&ab_channel=StatQuestwithJoshStarmer](https://www.youtube.com/watch?v=RDZUdRSDOok&ab_channel=StatQuestwithJoshStarmer)
+- [https://www.geeksforgeeks.org/dbscan-clustering-in-ml-density-based-clustering/](https://www.geeksforgeeks.org/dbscan-clustering-in-ml-density-based-clustering/)
+
+## Mean-Shift Clustering
 
 - Also a density based clustering algorithm
 - Unlike K-means you don’t have to specify the number of clusters
@@ -180,7 +242,7 @@ plt.show()
 - Bandwidth is too high ⇒ less clusters that is very huge
 - Bandwidth is too low ⇒ too many clusters that are small (may not even be clusters)
 
-## Procedure
+### Procedure
 
 1. Initialize centroids. Start with a set of data points as candidate centroids. (all points are centroids) (?? can this be changed?)
 
@@ -196,7 +258,10 @@ plt.show()
         <img src="img/image%207.png" width="45%">
     </p>
 
-## Example Code
+### Clustering
+
+![image.png](img/meanShift_Clustering.png)
+
 
 ```python
 import matplotlib.pyplot as plt
@@ -219,8 +284,55 @@ plt.title("Mean Shift Clustering")
 plt.show()
 ```
 
-## Resources
+### Find the Densest Cluster
 
-- https://www.youtube.com/watch?v=Evc53OaDTFc&ab_channel=Udacity
-- https://www.youtube.com/watch?v=dNANpVZnIfA
-- https://www.geeksforgeeks.org/ml-mean-shift-clustering/
+![image.png](img/meanShift_densest.png)
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import MeanShift, estimate_bandwidth
+from sklearn.datasets import make_blobs
+from scipy.spatial import distance
+
+X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.5, random_state=0)
+
+bandwidth = estimate_bandwidth(X, quantile=0.2, n_samples=100)
+ms = MeanShift(bandwidth=bandwidth)
+ms.fit(X)
+labels = ms.labels_
+centers = ms.cluster_centers_
+
+radius = 1
+pt_counts = {}
+
+for l, c in enumerate(centers):
+    count = np.sum(distance.cdist([c], X, 'euclidean')[0] <= radius)
+    pt_counts[l] = count
+    print(f"cluster {l}: {c} [{count}]")
+
+max_dens_cluster = max(pt_counts, key=pt_counts.get)
+max_dens_pt = centers[max_dens_cluster]
+
+plt.figure(figsize=(8, 6))
+plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
+
+for l, c in enumerate(centers):
+    markerC = 'red' if l != max_dens_cluster else 'blue'
+    plt.scatter(c[0], c[1], c=markerC, marker='X', s=200, label=f"cluster {l}")
+
+    circle = plt.Circle(c, radius, color=markerC, fill=False, linestyle='dashed')
+    plt.gca().add_patch(circle)
+
+plt.axis('equal')
+plt.title("Mean Shift Clustering - Max Density Circle")
+plt.legend()
+plt.show()
+```
+
+
+### References
+
+- [https://www.youtube.com/watch?v=Evc53OaDTFc&ab_channel=Udacity](https://www.youtube.com/watch?v=Evc53OaDTFc&ab_channel=Udacity)
+- [https://www.youtube.com/watch?v=dNANpVZnIfA](https://www.youtube.com/watch?v=dNANpVZnIfA)
+- [https://www.geeksforgeeks.org/ml-mean-shift-clustering/](https://www.geeksforgeeks.org/ml-mean-shift-clustering/)
