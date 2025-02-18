@@ -7,6 +7,6 @@ X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.5, random_state=0)
 db = DBSCAN(eps=0.3, min_samples=5).fit(X)
 labels = db.labels_
 
-plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis', edgecolors='k')
+plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis')
 plt.title("DBSCAN Clustering")
 plt.show()
