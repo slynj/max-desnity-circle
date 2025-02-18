@@ -40,7 +40,7 @@ plt.scatter(X[:, 0], X[:, 1], c=labels, cmap='viridis', edgecolors='k')
 
 for l, c in centers:
     markerC = 'red' if l != max_dens_cluster else 'blue'
-    plt.scatter(c[0], c[1], c=markerC, edgecolors='k', marker='X', s=200, label=f"Cluster {l}")
+    plt.scatter(c[0], c[1], c=markerC, marker='X', s=200, label=f"Cluster {l}")
 
     circle = plt.Circle(c, radius, color=markerC, fill=False, linestyle='dashed')
     plt.gca().add_patch(circle)
