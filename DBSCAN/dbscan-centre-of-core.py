@@ -46,6 +46,6 @@ for l, c in centers:
     plt.gca().add_patch(circle)
 
 plt.axis('equal')
-plt.title("DBSCAN Clustering Max Density Circle")
+plt.title("DBSCAN Clustering - Max Density Circle")
 plt.legend()
 plt.show()
