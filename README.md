@@ -9,7 +9,7 @@
 
 **Objective:**
 
-- Continuously identify the coordinate $c$ **such that the circle of radius 100 m centred at $c$contains the maximum number of points from P. The solution must be updated in near real time as new points are added (or removed).
+- Continuously identify the coordinate $c$ such that the circle of radius 100 m centred at $c$contains the maximum number of points from P. The solution must be updated in near real time as new points are added (or removed).
 
 # DBSCAN (Density Based Spatial Clustering of Applications with Noise)
 
